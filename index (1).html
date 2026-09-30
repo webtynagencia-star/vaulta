@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>VAULTA — Smart Card Biométrico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --black:#06060a;--dark:#0c0c14;--surf:#111119;--surf2:#181822;
+  --border:rgba(255,255,255,0.06);--bord2:rgba(255,255,255,0.1);
+  --cyan:#00d4f0;--cyan2:rgba(0,212,240,0.1);
+  --white:#eeeef5;--gray:#5a5a6e;--gray2:#8888a0;--gray3:#b0b0c4;
+  --steel:#7a9ab0;--titan:#c0a030;--carbon:#a8b0c0;--obs:#9050d8;
+  --red:#e03348;--green:#00c890;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;font-weight:400;min-width:1280px;overflow-x:auto;-webkit-font-smoothing:antialiased;}
+
+/* SVG icons */
+.icon{display:block;flex-shrink:0;}
+.icon-sm{width:14px;height:14px;}
+.icon-md{width:18px;height:18px;}
+.icon-lg{width:22px;height:22px;}
+.icon-xl{width:24px;height:24px;}
+
+/* NOISE */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.6;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:0 64px;height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(6,6,10,.93);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.nav-logo{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:18px;letter-spacing:.16em;color:var(--white);display:flex;align-items:center;}
+.nav-logo .dot{color:var(--cyan);}
+.nav-links{display:flex;gap:36px;list-style:none;}
+.nav-links a{color:var(--gray2);text-decoration:none;font-size:13px;font-weight:500;letter-spacing:.04em;transition:color .2s;}
+.nav-links a:hover{color:var(--white);}
+.nav-cta{background:var(--cyan);color:var(--black);border:none;padding:9px 22px;border-radius:6px;font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.02em;cursor:pointer;transition:all .2s;}
+.nav-cta:hover{filter:brightness(1.08);transform:translateY(-1px);}
+
+/* HERO */
+.hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:60px;padding:100px 80px 80px;position:relative;overflow:hidden;}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.013) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.013) 1px,transparent 1px);background-size:52px 52px;mask-image:radial-gradient(ellipse 80% 70% at 60% 50%,black 20%,transparent 80%);}
+.orb{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none;}
+.orb1{width:500px;height:500px;background:radial-gradient(circle,rgba(0,212,240,.05) 0%,transparent 70%);top:10%;right:5%;animation:pulse 8s ease-in-out infinite;}
+.orb2{width:300px;height:300px;background:radial-gradient(circle,rgba(144,80,216,.04) 0%,transparent 70%);bottom:20%;right:30%;animation:drift 10s ease-in-out infinite alternate;}
+@keyframes pulse{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.06)}}
+@keyframes drift{0%{transform:translate(0,0)}100%{transform:translate(20px,-20px)}}
+
+.hero-left{position:relative;z-index:2;animation:fadeUp .7s ease both;}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(0,212,240,.06);border:1px solid rgba(0,212,240,.18);border-radius:4px;padding:5px 14px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan);margin-bottom:32px;font-weight:600;}
+.badge-dot{width:5px;height:5px;background:var(--cyan);border-radius:50%;animation:blink 2s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.hero h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:56px;font-weight:800;line-height:1.08;letter-spacing:-.025em;margin-bottom:20px;}
+.hero h1 em{font-style:normal;color:var(--cyan);}
+.hero-sub{font-size:16px;color:var(--gray2);line-height:1.72;max-width:420px;margin-bottom:40px;font-weight:300;}
+.hero-sub strong{color:var(--gray3);font-weight:500;}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;}
+.btn-primary{background:var(--cyan);color:var(--black);border:none;padding:14px 30px;border-radius:7px;font-family:'Inter',sans-serif;font-weight:600;font-size:14px;cursor:pointer;transition:all .25s;letter-spacing:.02em;}
+.btn-primary:hover{filter:brightness(1.08);transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,212,240,.28);}
+.btn-secondary{background:transparent;color:var(--gray3);border:1px solid var(--border);padding:14px 28px;border-radius:7px;font-family:'Inter',sans-serif;font-weight:400;font-size:14px;cursor:pointer;transition:all .25s;}
+.btn-secondary:hover{border-color:var(--bord2);color:var(--white);transform:translateY(-2px);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+.hero-indicators{display:flex;gap:28px;margin-top:44px;border-top:1px solid var(--border);padding-top:28px;}
+.h-ind{display:flex;flex-direction:column;gap:3px;}
+.h-ind-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;color:var(--white);}
+.h-ind-val em{font-style:normal;color:var(--cyan);}
+.h-ind-lbl{font-size:11px;color:var(--gray);letter-spacing:.04em;}
+
+/* CARD */
+.hero-right{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;animation:fadeUp .9s ease .15s both;}
+.card-scene{perspective:1400px;}
+.vcard{width:400px;height:252px;border-radius:18px;background:linear-gradient(140deg,#1a1a28 0%,#0e0e1a 50%,#1c1c2c 100%);border:1px solid rgba(255,255,255,.09);position:relative;transform-style:preserve-3d;animation:floatCard 7s ease-in-out infinite;box-shadow:0 60px 100px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.04),inset 0 1px 0 rgba(255,255,255,.08),0 0 80px rgba(0,212,240,.05);overflow:hidden;cursor:pointer;transition:transform .35s ease;}
+@keyframes floatCard{0%,100%{transform:rotateX(8deg) rotateY(-10deg) translateY(0)}50%{transform:rotateX(6deg) rotateY(-7deg) translateY(-16px)}}
+.vcard::before{content:'';position:absolute;inset:0;background:linear-gradient(125deg,transparent 30%,rgba(0,212,240,.03) 50%,transparent 70%);animation:sheen 5s ease-in-out infinite;}
+@keyframes sheen{0%{transform:translateX(-100%) translateY(-100%)}100%{transform:translateX(100%) translateY(100%)}}
+.vcard::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,212,240,.7),rgba(140,80,240,.35),transparent);}
+.card-inner{padding:26px 30px;height:100%;display:flex;flex-direction:column;justify-content:space-between;}
+.card-row1{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.card-brand{font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:800;letter-spacing:.2em;color:rgba(255,255,255,.88);}
+.card-chip{width:36px;height:27px;background:linear-gradient(130deg,#c0a030,#e8cc60,#b09020);border-radius:4px;position:relative;overflow:hidden;flex-shrink:0;}
+.card-chip::before{content:'';position:absolute;inset:3px;border:1px solid rgba(0,0,0,.22);border-radius:2px;}
+.card-chip::after{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(0,0,0,.18);transform:translateY(-50%);}
+.card-screen{background:rgba(0,0,0,.5);border:1px solid rgba(0,212,240,.16);border-radius:8px;padding:7px 13px;display:flex;align-items:center;gap:9px;backdrop-filter:blur(8px);}
+.card-led{width:6px;height:6px;background:var(--cyan);border-radius:50%;box-shadow:0 0 7px var(--cyan);animation:blink 2s ease-in-out infinite;flex-shrink:0;}
+.card-number{font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;letter-spacing:.24em;color:rgba(255,255,255,.55);}
+.card-lock{margin-left:auto;display:flex;align-items:center;color:var(--cyan);opacity:.8;}
+.card-row3{display:flex;justify-content:space-between;align-items:flex-end;}
+.card-exp{font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;letter-spacing:.16em;color:rgba(255,255,255,.32);}
+.card-fp{width:36px;height:36px;border:1.5px solid rgba(0,212,240,.35);border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;color:var(--cyan);}
+.card-fp::before{content:'';position:absolute;inset:-5px;border:1px solid rgba(0,212,240,.12);border-radius:50%;animation:fpPulse 2.5s ease-in-out infinite;}
+@keyframes fpPulse{0%,100%{opacity:.2;transform:scale(1)}50%{opacity:.9;transform:scale(1.1)}}
+
+/* chips */
+.chip{position:absolute;background:rgba(12,12,20,.94);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:8px 14px;font-size:11px;color:var(--gray2);backdrop-filter:blur(14px);white-space:nowrap;display:flex;align-items:center;gap:8px;}
+.chip.c1{top:-18px;left:-80px;animation:fc 4s ease-in-out infinite;}
+.chip.c2{top:60px;left:-96px;animation:fc 4s ease-in-out .7s infinite;}
+.chip.c3{bottom:60px;left:-88px;animation:fc 4s ease-in-out 1.4s infinite;}
+.chip.c4{top:-14px;right:-92px;border-color:rgba(0,212,240,.14);color:var(--cyan);animation:fc 4.5s ease-in-out .3s infinite;}
+.chip.c5{top:72px;right:-100px;border-color:rgba(0,212,240,.14);color:var(--cyan);animation:fc 4.5s ease-in-out 1s infinite;}
+@keyframes fc{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+/* TRUST */
+.trust-bar{display:flex;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surf);}
+.trust-item{flex:1;padding:24px 28px;border-right:1px solid var(--border);text-align:center;transition:background .3s;}
+.trust-item:last-child{border-right:none;}
+.trust-item:hover{background:rgba(0,212,240,.02);}
+.t-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:28px;font-weight:800;color:var(--white);display:block;}
+.t-val em{font-style:normal;color:var(--cyan);}
+.t-lbl{font-size:10.5px;color:var(--gray);letter-spacing:.06em;text-transform:uppercase;margin-top:3px;display:block;}
+
+/* SECTIONS */
+section{position:relative;z-index:1;}
+.sec{padding:100px 80px;}
+.sec-tag{display:inline-block;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);font-weight:600;background:rgba(0,212,240,.06);border:1px solid rgba(0,212,240,.14);border-radius:3px;padding:4px 10px;margin-bottom:20px;}
+.sec-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:46px;font-weight:800;line-height:1.1;letter-spacing:-.022em;margin-bottom:14px;}
+.sec-sub{color:var(--gray2);font-size:15.5px;line-height:1.72;max-width:480px;font-weight:300;}
+
+/* PROBLEMA */
+.problem-sec{background:var(--surf);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.prob-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:56px;}
+.prob-card{background:var(--black);border:1px solid var(--border);border-radius:12px;padding:28px;position:relative;overflow:hidden;transition:border-color .3s;}
+.prob-card:hover{border-color:rgba(224,51,72,.22);}
+.prob-card::before{content:'';position:absolute;top:0;left:0;width:2px;height:100%;background:var(--red);}
+.prob-icon{width:40px;height:40px;background:rgba(224,51,72,.08);border:1px solid rgba(224,51,72,.16);border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;color:var(--red);}
+.prob-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;margin-bottom:8px;}
+.prob-desc{color:var(--gray2);font-size:13.5px;line-height:1.68;}
+.prob-stat{display:flex;align-items:center;gap:14px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);}
+.prob-num{font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;font-weight:800;color:var(--red);white-space:nowrap;}
+.prob-stat-lbl{font-size:11.5px;color:var(--gray2);line-height:1.5;}
+
+/* FEATURES */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-top:60px;}
+.feat-card{background:var(--surf);padding:36px 30px;position:relative;overflow:hidden;transition:background .3s;}
+.feat-card:hover{background:var(--surf2);}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:0;transition:opacity .3s;}
+.feat-card:hover::before{opacity:1;}
+.feat-ico{width:44px;height:44px;background:rgba(0,212,240,.08);border:1px solid rgba(0,212,240,.14);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:18px;color:var(--cyan);}
+.feat-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;margin-bottom:8px;}
+.feat-text{color:var(--gray2);font-size:13px;line-height:1.7;}
+
+/* STEPS */
+.how-sec{background:var(--surf);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:64px;position:relative;}
+.steps::before{content:'';position:absolute;top:24px;left:72px;right:72px;height:1px;background:linear-gradient(90deg,transparent,var(--border),rgba(0,212,240,.12),var(--border),transparent);}
+.step{text-align:center;}
+.step-n{width:48px;height:48px;background:var(--surf2);border:1px solid rgba(0,212,240,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:800;color:var(--cyan);margin:0 auto 20px;position:relative;z-index:1;}
+.step h3{font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;margin-bottom:7px;}
+.step p{color:var(--gray2);font-size:13px;line-height:1.68;}
+
+/* PLANOS */
+.planos-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:64px;}
+.tier-steel{--tc:var(--steel);--tbg:#0f1418;}
+.tier-titan{--tc:var(--titan);--tbg:#121008;}
+.tier-carbon{--tc:var(--carbon);--tbg:#101014;}
+.tier-obs{--tc:var(--obs);--tbg:#0e0818;}
+.plan-card{background:var(--tbg);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden;position:relative;transition:transform .3s,box-shadow .3s;}
+.plan-card:hover{transform:translateY(-5px);box-shadow:0 24px 50px rgba(0,0,0,.5),0 0 0 1px var(--tc);}
+.plan-card.best{border-color:var(--tc);box-shadow:0 16px 40px rgba(0,0,0,.4),0 0 0 1px var(--tc);}
+.plan-card.best .plan-badge{display:block;}
+.plan-badge{display:none;position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:var(--tc);color:var(--black);font-size:8.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;padding:4px 14px;border-radius:0 0 6px 6px;}
+.plan-bar{height:3px;background:var(--tc);}
+.plan-body{padding:28px 24px;}
+.plan-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800;color:var(--tc);letter-spacing:.12em;margin-bottom:3px;}
+.plan-sub{font-size:11.5px;color:var(--gray);margin-bottom:20px;}
+.plan-price{font-family:'Plus Jakarta Sans',sans-serif;font-size:34px;font-weight:800;color:var(--white);line-height:1;}
+.plan-note{font-size:11px;color:var(--gray);margin-top:5px;margin-bottom:18px;}
+.plan-cb{background:color-mix(in srgb,var(--tc) 7%,transparent);border:1px solid color-mix(in srgb,var(--tc) 18%,transparent);border-radius:7px;padding:10px 13px;display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.plan-cb-lbl{font-size:11px;color:var(--gray2);}
+.plan-cb-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:19px;font-weight:800;color:var(--tc);}
+.plan-div{height:1px;background:rgba(255,255,255,.05);margin-bottom:18px;}
+.plan-feats{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:22px;}
+.plan-feats li{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;color:var(--gray2);}
+.pck{width:16px;height:16px;background:color-mix(in srgb,var(--tc) 10%,transparent);border:1px solid color-mix(in srgb,var(--tc) 25%,transparent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--tc);flex-shrink:0;margin-top:1px;}
+.plan-btn{width:100%;padding:12px;border-radius:7px;font-family:'Inter',sans-serif;font-weight:600;font-size:13px;cursor:pointer;transition:all .22s;border:none;letter-spacing:.02em;}
+.plan-btn-fill{background:var(--tc);color:var(--black);}
+.plan-btn-fill:hover{filter:brightness(1.1);transform:translateY(-1px);}
+.plan-btn-out{background:transparent;border:1px solid color-mix(in srgb,var(--tc) 35%,transparent);color:var(--tc);}
+.plan-btn-out:hover{background:color-mix(in srgb,var(--tc) 8%,transparent);transform:translateY(-1px);}
+
+.guarantee{display:flex;align-items:center;justify-content:center;gap:32px;flex-wrap:wrap;margin-top:28px;padding:18px 28px;background:var(--surf);border:1px solid var(--border);border-radius:10px;}
+.g-item{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--gray2);}
+.g-item svg{color:var(--cyan);flex-shrink:0;}
+
+/* CASHBACK */
+.cb-sec{background:var(--surf);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.cb-inner{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+.cb-visual{position:relative;height:400px;display:flex;align-items:center;justify-content:center;}
+.cb-ring{position:absolute;border-radius:50%;border:1px solid rgba(0,212,240,.08);animation:cbR 3.5s ease-in-out infinite;}
+.cb-ring:nth-child(1){width:160px;height:160px;animation-delay:0s;}
+.cb-ring:nth-child(2){width:260px;height:260px;animation-delay:.5s;}
+.cb-ring:nth-child(3){width:360px;height:360px;animation-delay:1s;}
+@keyframes cbR{0%{opacity:.5;transform:scale(.96)}100%{opacity:0;transform:scale(1.04)}}
+.cb-center{width:130px;height:130px;background:var(--surf2);border:1px solid rgba(0,212,240,.2);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;z-index:1;box-shadow:0 0 40px rgba(0,212,240,.07);}
+.cb-big{font-family:'Plus Jakarta Sans',sans-serif;font-size:40px;font-weight:800;color:var(--cyan);line-height:1;}
+.cb-small{font-size:10px;color:var(--gray2);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;}
+.cb-tags{position:absolute;display:flex;flex-direction:column;gap:8px;}
+.cb-tags.l{left:0;}
+.cb-tags.r{right:0;}
+.cb-tag{background:rgba(10,10,18,.96);border:1px solid var(--border);border-radius:7px;padding:7px 12px;font-size:10.5px;color:var(--gray2);display:flex;align-items:center;gap:7px;white-space:nowrap;}
+.cb-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.cb-bars{margin-top:32px;display:flex;flex-direction:column;gap:12px;}
+.cb-row{display:flex;align-items:center;gap:12px;}
+.cb-name{width:76px;font-size:10.5px;font-weight:700;letter-spacing:.08em;}
+.cb-track{flex:1;height:7px;background:var(--surf2);border-radius:100px;overflow:hidden;}
+.cb-fill{height:100%;border-radius:100px;transition:width 1.4s ease;}
+.cb-pct{width:34px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;text-align:right;}
+
+/* SEGURANÇA */
+.seg-inner{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+.seg-list{list-style:none;margin-top:32px;display:flex;flex-direction:column;gap:12px;}
+.seg-item{display:flex;align-items:flex-start;gap:14px;padding:18px 20px;background:var(--surf);border:1px solid var(--border);border-radius:10px;transition:border-color .3s;}
+.seg-item:hover{border-color:rgba(0,212,240,.16);}
+.seg-ico{width:40px;height:40px;background:rgba(0,212,240,.08);border:1px solid rgba(0,212,240,.12);border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--cyan);flex-shrink:0;}
+.seg-t{font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;margin-bottom:4px;}
+.seg-d{font-size:12.5px;color:var(--gray2);line-height:1.65;}
+.seg-stats{display:flex;flex-direction:column;gap:14px;}
+.seg-stat{background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:24px;display:flex;align-items:center;gap:18px;}
+.seg-n{font-family:'Plus Jakarta Sans',sans-serif;font-size:32px;font-weight:800;color:var(--cyan);white-space:nowrap;}
+.seg-l{font-size:12.5px;color:var(--gray2);line-height:1.6;}
+
+/* COMPARATIVO */
+.comp-sec{background:var(--surf);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.comp-wrap{overflow-x:auto;margin-top:56px;}
+.comp-table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden;}
+.comp-table th,.comp-table td{padding:14px 18px;text-align:left;border-bottom:1px solid var(--border);}
+.comp-table th{font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gray2);background:var(--surf2);}
+.comp-table th.hi{background:rgba(0,212,240,.07);color:var(--cyan);}
+.comp-table td{font-size:13px;color:var(--gray2);}
+.comp-table td.feat{color:var(--white);font-weight:500;}
+.comp-table td.yes{color:var(--green);font-weight:600;}
+.comp-table td.no{color:var(--red);}
+.comp-table td.vaulta{color:var(--cyan);font-weight:600;background:rgba(0,212,240,.025);}
+.comp-table tr:hover td{background:rgba(255,255,255,.016);}
+
+/* DEPOIMENTOS */
+.dep-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:56px;}
+.dep-card{background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:26px;position:relative;}
+.dep-quote{position:absolute;top:12px;right:18px;font-size:60px;color:rgba(0,212,240,.07);line-height:1;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;}
+.dep-stars{display:flex;gap:3px;margin-bottom:12px;}
+.dep-stars svg{color:var(--titan);}
+.dep-text{color:var(--gray2);font-size:13px;line-height:1.72;margin-bottom:18px;font-style:italic;}
+.dep-author{display:flex;align-items:center;gap:11px;}
+.dep-av{width:38px;height:38px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;flex-shrink:0;}
+.dep-name{font-size:13px;font-weight:600;color:var(--white);}
+.dep-role{font-size:11px;color:var(--gray);}
+
+/* FAQ */
+.faq-list{max-width:760px;margin:56px auto 0;display:flex;flex-direction:column;gap:2px;}
+.faq-item{background:var(--surf);border:1px solid var(--border);border-radius:9px;overflow:hidden;transition:border-color .3s;}
+.faq-item.open{border-color:rgba(0,212,240,.18);}
+.faq-q{padding:18px 22px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:14px;user-select:none;}
+.faq-qt{font-size:14px;font-weight:500;color:var(--white);}
+.faq-ic{width:20px;height:20px;background:rgba(0,212,240,.08);border:1px solid rgba(0,212,240,.18);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--cyan);font-size:13px;flex-shrink:0;transition:transform .3s;}
+.faq-item.open .faq-ic{transform:rotate(45deg);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .4s ease,padding .3s;}
+.faq-item.open .faq-a{max-height:260px;padding:0 22px 18px;}
+.faq-a p{color:var(--gray2);font-size:13.5px;line-height:1.75;}
+
+/* CTA */
+.cta-sec{padding:120px 80px;text-align:center;position:relative;overflow:hidden;background:var(--surf);border-top:1px solid var(--border);}
+.cta-glow{position:absolute;width:560px;height:360px;background:radial-gradient(ellipse,rgba(0,212,240,.048) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+.cta-sec h2{font-family:'Plus Jakarta Sans',sans-serif;font-size:58px;font-weight:800;line-height:1.06;letter-spacing:-.022em;margin-bottom:18px;position:relative;}
+.cta-sec p{color:var(--gray2);font-size:16px;max-width:400px;margin:0 auto 40px;line-height:1.7;position:relative;}
+.cta-form{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;position:relative;}
+.cta-input{background:var(--surf2);border:1px solid var(--border);border-radius:7px;padding:14px 20px;color:var(--white);font-family:'Inter',sans-serif;font-size:14px;width:280px;outline:none;transition:border-color .2s;}
+.cta-input::placeholder{color:var(--gray);}
+.cta-input:focus{border-color:rgba(0,212,240,.3);}
+.cta-note{margin-top:16px;font-size:11.5px;color:var(--gray);position:relative;display:flex;align-items:center;justify-content:center;gap:6px;}
+.cta-note span{color:var(--cyan);}
+.tier-pills{display:flex;gap:10px;justify-content:center;margin-top:40px;flex-wrap:wrap;}
+.tier-pill{background:var(--surf2);border-radius:7px;padding:11px 22px;text-align:center;}
+.tier-pill-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:800;letter-spacing:.12em;}
+.tier-pill-price{font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800;color:var(--white);margin-top:3px;}
+
+/* FOOTER */
+footer{padding:36px 80px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:20px;}
+.f-logo{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;letter-spacing:.16em;}
+.f-logo span{color:var(--cyan);}
+.f-links{display:flex;gap:24px;list-style:none;justify-content:center;}
+.f-links a{color:var(--gray);text-decoration:none;font-size:12px;transition:color .2s;}
+.f-links a:hover{color:var(--white);}
+.f-copy{color:var(--gray);font-size:11px;text-align:right;}
+
+/* URGENCY */
+.urgency{position:fixed;bottom:0;left:0;right:0;z-index:150;background:rgba(12,12,20,.96);border-top:1px solid rgba(0,212,240,.12);padding:12px 64px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(18px);}
+.u-left{display:flex;align-items:center;gap:10px;}
+.u-dot{width:7px;height:7px;background:var(--green);border-radius:50%;box-shadow:0 0 7px var(--green);animation:blink 1.6s ease-in-out infinite;}
+.u-text{font-size:13px;color:var(--white);}
+.u-text strong{color:var(--cyan);}
+.u-timer{font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;color:var(--cyan);letter-spacing:.04em;}
+.u-btn{background:var(--cyan);color:var(--black);border:none;padding:9px 22px;border-radius:6px;font-family:'Inter',sans-serif;font-weight:600;font-size:13px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.u-btn:hover{filter:brightness(1.08);transform:translateY(-1px);}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(24px);transition:all .65s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* DESKTOP ONLY */
+</style>
+</head>
+<body>
+
+<!-- SVG ICON LIBRARY -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="ico-fingerprint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 10a2 2 0 0 0-2 2v1a2 2 0 0 0 4 0v-1a2 2 0 0 0-2-2z"/>
+    <path d="M9.5 8a4.5 4.5 0 0 1 5 0"/>
+    <path d="M7 6.5a7.5 7.5 0 0 1 10 0"/>
+    <path d="M4.5 4.5a11 11 0 0 1 15 0"/>
+  </symbol>
+  <symbol id="ico-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2" y="5" width="20" height="14" rx="2"/>
+    <path d="M2 10h20M7 15h2m4 0h4"/>
+  </symbol>
+  <symbol id="ico-wifi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0"/>
+    <circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="ico-bitcoin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <path d="M9 8h4.5a1.5 1.5 0 0 1 0 3H9v5h4.5a1.5 1.5 0 0 0 0-3H9M11 8V7m0 10v-1m2-10v-1m0 11v-1"/>
+  </symbol>
+  <symbol id="ico-gift" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 12v10H4V12M22 7H2v5h20V7zM12 22V7"/>
+    <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+    <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+  </symbol>
+  <symbol id="ico-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2"/>
+    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+  </symbol>
+  <symbol id="ico-lock-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2"/>
+    <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+  </symbol>
+  <symbol id="ico-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+  </symbol>
+  <symbol id="ico-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="5" y="2" width="14" height="20" rx="2"/>
+    <circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="ico-dollar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="12" y1="1" x2="12" y2="23"/>
+    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+  </symbol>
+  <symbol id="ico-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+  </symbol>
+  <symbol id="ico-package" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+    <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+    <line x1="12" y1="22.08" x2="12" y2="12"/>
+  </symbol>
+  <symbol id="ico-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="1 4 1 10 7 10"/>
+    <path d="M3.51 15a9 9 0 1 0 .49-4.95L1 10"/>
+  </symbol>
+  <symbol id="ico-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+    <circle cx="12" cy="7" r="4"/>
+  </symbol>
+  <symbol id="ico-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="18" y1="20" x2="18" y2="10"/>
+    <line x1="12" y1="20" x2="12" y2="4"/>
+    <line x1="6" y1="20" x2="6" y2="14"/>
+  </symbol>
+  <symbol id="ico-star" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+  </symbol>
+  <symbol id="ico-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="20 6 9 17 4 12"/>
+  </symbol>
+</svg>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">VAULT<span class="dot">A</span></div>
+  <ul class="nav-links">
+    <li><a href="#features">Recursos</a></li>
+    <li><a href="#planos">Planos</a></li>
+    <li><a href="#cashback">Cashback</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <button class="nav-cta" onclick="document.getElementById('planos').scrollIntoView({behavior:'smooth'})">Garantir meu VAULTA</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+
+  <div class="hero-left">
+    <div class="hero-badge"><span class="badge-dot"></span>Pré-lançamento · vagas limitadas</div>
+    <h1>Sua carteira inteira.<br><em>Um único cartão.</em></h1>
+    <p class="hero-sub">
+      Crédito, cripto e gift cards em um smart card biométrico do tamanho do seu bolso.
+      <strong>Desbloqueia com digital. Controla pelo celular. Cashback automático.</strong>
+    </p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="document.getElementById('planos').scrollIntoView({behavior:'smooth'})">Garantir meu VAULTA</button>
+      <button class="btn-secondary" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">Como funciona</button>
+    </div>
+    <div class="hero-indicators">
+      <div class="h-ind"><span class="h-ind-val"><em>6</em>%</span><span class="h-ind-lbl">Cashback máximo</span></div>
+      <div class="h-ind"><span class="h-ind-val">1<em>x</em></span><span class="h-ind-lbl">Pagamento único</span></div>
+      <div class="h-ind"><span class="h-ind-val">0,<em>3s</em></span><span class="h-ind-lbl">Desbloqueio</span></div>
+      <div class="h-ind"><span class="h-ind-val"><em>+10</em></span><span class="h-ind-lbl">Cartões</span></div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="card-scene" id="cardWrap">
+      <div class="chip c1"><svg class="icon icon-sm" style="color:var(--titan)"><use href="#ico-bitcoin"/></svg>Bitcoin <strong style="color:var(--titan);margin-left:2px">+2.4%</strong></div>
+      <div class="chip c2"><svg class="icon icon-sm"><use href="#ico-card"/></svg>Nubank ··· 4821</div>
+      <div class="chip c3"><svg class="icon icon-sm"><use href="#ico-gift"/></svg>Gift Card R$200</div>
+      <div class="chip c4"><svg class="icon icon-sm"><use href="#ico-fingerprint"/></svg>Digital ativa</div>
+      <div class="chip c5"><svg class="icon icon-sm"><use href="#ico-wifi"/></svg>NFC pronto</div>
+
+      <div class="vcard" id="vcard">
+        <div class="card-inner">
+          <div class="card-row1">
+            <div class="card-brand">VAULTA</div>
+            <div class="card-chip"></div>
+            <div style="color:rgba(255,255,255,.28)">
+              <svg class="icon icon-md"><use href="#ico-wifi"/></svg>
+            </div>
+          </div>
+          <div class="card-screen">
+            <div class="card-led"></div>
+            <div class="card-number">···· ···· ···· 8821</div>
+            <div class="card-lock"><svg class="icon icon-sm"><use href="#ico-lock"/></svg></div>
+          </div>
+          <div class="card-row3">
+            <div class="card-exp">VALID 08/29</div>
+            <div class="card-fp"><svg class="icon icon-md"><use href="#ico-fingerprint"/></svg></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-item reveal"><span class="t-val">10<em>+</em></span><span class="t-lbl">Cartões suportados</span></div>
+  <div class="trust-item reveal"><span class="t-val"><em>6</em>%</span><span class="t-lbl">Cashback máximo</span></div>
+  <div class="trust-item reveal"><span class="t-val">AES<em>-256</em></span><span class="t-lbl">Criptografia</span></div>
+  <div class="trust-item reveal"><span class="t-val"><em>&lt;</em>3s</span><span class="t-lbl">Bloqueio remoto</span></div>
+  <div class="trust-item reveal"><span class="t-val"><em>1x</em></span><span class="t-lbl">Sem anuidade</span></div>
+</div>
+
+<!-- PROBLEMA -->
+<section class="sec problem-sec">
+  <div class="reveal">
+    <span class="sec-tag">O Problema</span>
+    <h2 class="sec-title">Você carrega uma carteira.<br>Ela carrega um risco.</h2>
+    <p class="sec-sub">O brasileiro médio carrega 3,2 cartões físicos sem controle integrado, sem segurança biométrica, sem visibilidade de gastos.</p>
+  </div>
+  <div class="prob-grid reveal">
+    <div class="prob-card">
+      <div class="prob-icon"><svg class="icon icon-lg"><use href="#ico-card"/></svg></div>
+      <div class="prob-title">Fragmentação de cartões</div>
+      <p class="prob-desc">Crédito, débito, vale-refeição, benefícios. Cada um em um app diferente, sem integração alguma.</p>
+      <div class="prob-stat"><div class="prob-num">3,2</div><div class="prob-stat-lbl">cartões físicos por brasileiro em média</div></div>
+    </div>
+    <div class="prob-card">
+      <div class="prob-icon"><svg class="icon icon-lg"><use href="#ico-lock-open"/></svg></div>
+      <div class="prob-title">Ausência de proteção real</div>
+      <p class="prob-desc">Qualquer pessoa que encontrar sua carteira pode usar seus cartões imediatamente. Sem nenhuma barreira.</p>
+      <div class="prob-stat"><div class="prob-num">67%</div><div class="prob-stat-lbl">dos brasileiros já tiveram cartão clonado ou furtado</div></div>
+    </div>
+    <div class="prob-card">
+      <div class="prob-icon"><svg class="icon icon-lg"><use href="#ico-chart"/></svg></div>
+      <div class="prob-title">Sem controle de gastos situacional</div>
+      <p class="prob-desc">Não existe mecanismo físico para limitar o quanto gastar em uma saída. O cartão sempre aceita tudo.</p>
+      <div class="prob-stat"><div class="prob-num">R$8,7Bi</div><div class="prob-stat-lbl">perdidos por fraude em cartões no Brasil por ano</div></div>
+    </div>
+    <div class="prob-card">
+      <div class="prob-icon"><svg class="icon icon-lg"><use href="#ico-bitcoin"/></svg></div>
+      <div class="prob-title">Cripto inacessível no varejo</div>
+      <p class="prob-desc">Usar cripto no dia a dia exige conversões manuais e processos complexos. Nada prático para ninguém.</p>
+      <div class="prob-stat"><div class="prob-num">312%</div><div class="prob-stat-lbl">crescimento no uso de cripto no Brasil em 3 anos</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="sec" id="features">
+  <div class="reveal">
+    <span class="sec-tag">Solução</span>
+    <h2 class="sec-title">Tecnologia que nenhum<br>banco oferece ainda.</h2>
+    <p class="sec-sub">O VAULTA integra em um único cartão físico tudo o que hoje existe separado, com segurança que o celular não consegue oferecer.</p>
+  </div>
+  <div class="feat-grid reveal">
+    <div class="feat-card">
+      <div class="feat-ico"><svg class="icon icon-lg"><use href="#ico-fingerprint"/></svg></div>
+      <div class="feat-name">Biometria no Cartão</div>
+      <p class="feat-text">Sensor de digital embarcado no próprio cartão. Sem sua impressão, o cartão não realiza nenhuma transação em lugar nenhum.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-ico"><svg class="icon icon-lg"><use href="#ico-wifi"/></svg></div>
+      <div class="feat-name">NFC Universal</div>
+      <p class="feat-text">Compatível com todas as maquininhas modernas. Pagamento por aproximação ultrarrápido em milhões de estabelecimentos.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-ico"><svg class="icon icon-lg"><use href="#ico-card"/></svg></div>
+      <div class="feat-name">Multi-Cartão</div>
+      <p class="feat-text">Adicione quantos cartões de crédito e débito quiser. Escolha qual usar em cada compra diretamente pelo app.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-ico"><svg class="icon icon-lg"><use href="#ico-bitcoin"/></svg></div>
+      <div class="feat-name">Cripto Nativa</div>
+      <p class="feat-text">Bitcoin, Ethereum, Solana e mais. Conversão automática no momento da transação, transparente para o estabelecimento.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-ico"><svg class="icon icon-lg"><use href="#ico-gift"/></svg></div>
+      <div class="feat-name">Modo Gift Card</div>
+      <p class="feat-text">Defina um valor máximo antes de sair. O cartão recusa transações acima do limite. Controle de gastos físico e definitivo.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-ico"><svg class="icon icon-lg"><use href="#ico-lock"/></svg></div>
+      <div class="feat-name">Bloqueio Remoto</div>
+      <p class="feat-text">Perdeu o cartão? Um toque no app e ele é desativado globalmente em menos de 3 segundos. Sem burocracia bancária.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-ico"><svg class="icon icon-lg"><use href="#ico-phone"/></svg></div>
+      <div class="feat-name">Controle pelo Celular</div>
+      <p class="feat-text">Toda alteração exige autenticação no celular cadastrado. Segurança em camadas: cartão, biometria e dispositivo mestre.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-ico"><svg class="icon icon-lg"><use href="#ico-dollar"/></svg></div>
+      <div class="feat-name">Cashback Automático</div>
+      <p class="feat-text">Percentual fixo creditado a cada transação. Sem pontos, sem conversão, sem prazo de expiração. Dinheiro real.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-ico"><svg class="icon icon-lg"><use href="#ico-shield"/></svg></div>
+      <div class="feat-name">Chip AES-256</div>
+      <p class="feat-text">Criptografia de nível governamental. Dados nunca expostos sem autenticação. Autobloqueio após tentativas suspeitas.</p>
+    </div>
+  </div>
+</section>
+
+<!-- COMO FUNCIONA -->
+<section class="sec how-sec">
+  <div class="reveal" style="text-align:center">
+    <span class="sec-tag">Como Funciona</span>
+    <h2 class="sec-title">Ativo em 4 passos.</h2>
+    <p class="sec-sub" style="margin:0 auto">Do cadastro ao primeiro pagamento em menos de 5 minutos.</p>
+  </div>
+  <div class="steps reveal">
+    <div class="step"><div class="step-n">01</div><h3>Baixe o App</h3><p>Crie sua conta em minutos. Vincule seu celular como dispositivo mestre e único autorizador de alterações.</p></div>
+    <div class="step"><div class="step-n">02</div><h3>Adicione seus Cartões</h3><p>Importe cartões de crédito, configure carteiras cripto e defina gift cards com valores personalizados.</p></div>
+    <div class="step"><div class="step-n">03</div><h3>Ative sua Biometria</h3><p>Registre sua digital no cartão físico. A partir daí, só você consegue realizar transações.</p></div>
+    <div class="step"><div class="step-n">04</div><h3>Pague com NFC</h3><p>Digital no cartão, aproxima na maquininha. Seguro, elegante e definitivamente mais prático.</p></div>
+  </div>
+</section>
+
+<!-- PLANOS -->
+<section class="sec" id="planos">
+  <div class="reveal">
+    <span class="sec-tag">Planos</span>
+    <h2 class="sec-title">Escolha seu nível.<br>Pague uma única vez.</h2>
+    <p class="sec-sub">Sem mensalidade. Sem anuidade. Sem surpresas. Um pagamento, acesso permanente.</p>
+  </div>
+  <div class="planos-grid reveal">
+    <div class="plan-card tier-steel">
+      <div class="plan-bar"></div>
+      <div class="plan-body">
+        <div class="plan-name">STEEL</div><div class="plan-sub">Essencial</div>
+        <div class="plan-price">R$ 149</div><div class="plan-note">pagamento único · frete incluso</div>
+        <div class="plan-cb"><div class="plan-cb-lbl">Cashback por compra</div><div class="plan-cb-val">1%</div></div>
+        <div class="plan-div"></div>
+        <ul class="plan-feats">
+          <li><div class="pck">✓</div>Até 3 cartões simultâneos</li>
+          <li><div class="pck">✓</div>NFC e biometria</li>
+          <li><div class="pck">✓</div>Modo Gift Card</li>
+          <li><div class="pck">✓</div>Bloqueio remoto</li>
+          <li><div class="pck">✓</div>Suporte por chat</li>
+        </ul>
+        <button class="plan-btn plan-btn-out" onclick="alert('Em breve!')">Quero o STEEL</button>
+      </div>
+    </div>
+    <div class="plan-card tier-titan">
+      <div class="plan-bar"></div>
+      <div class="plan-body">
+        <div class="plan-name">TITAN</div><div class="plan-sub">Profissional</div>
+        <div class="plan-price">R$ 299</div><div class="plan-note">pagamento único · frete incluso</div>
+        <div class="plan-cb"><div class="plan-cb-lbl">Cashback por compra</div><div class="plan-cb-val">2,5%</div></div>
+        <div class="plan-div"></div>
+        <ul class="plan-feats">
+          <li><div class="pck">✓</div>Até 8 cartões simultâneos</li>
+          <li><div class="pck">✓</div>Cripto integrada</li>
+          <li><div class="pck">✓</div>Gift Card ilimitado</li>
+          <li><div class="pck">✓</div>2,5% cashback</li>
+          <li><div class="pck">✓</div>Suporte prioritário 24h</li>
+        </ul>
+        <button class="plan-btn plan-btn-fill" onclick="alert('Em breve!')">Quero o TITAN</button>
+      </div>
+    </div>
+    <div class="plan-card tier-carbon best">
+      <div class="plan-badge">MAIS ESCOLHIDO</div>
+      <div class="plan-bar"></div>
+      <div class="plan-body">
+        <div class="plan-name">CARBON</div><div class="plan-sub">Premium</div>
+        <div class="plan-price">R$ 499</div><div class="plan-note">pagamento único · frete incluso</div>
+        <div class="plan-cb"><div class="plan-cb-lbl">Cashback por compra</div><div class="plan-cb-val">4%</div></div>
+        <div class="plan-div"></div>
+        <ul class="plan-feats">
+          <li><div class="pck">✓</div>Cartões ilimitados</li>
+          <li><div class="pck">✓</div>Cripto e DeFi</li>
+          <li><div class="pck">✓</div>Multi gift cards ativos</li>
+          <li><div class="pck">✓</div>4% cashback</li>
+          <li><div class="pck">✓</div>Concierge 24h</li>
+          <li><div class="pck">✓</div>Chip de titânio premium</li>
+        </ul>
+        <button class="plan-btn plan-btn-fill" onclick="alert('Em breve!')">Quero o CARBON</button>
+      </div>
+    </div>
+    <div class="plan-card tier-obs">
+      <div class="plan-bar"></div>
+      <div class="plan-body">
+        <div class="plan-name">OBSIDIAN</div><div class="plan-sub">Elite</div>
+        <div class="plan-price">R$ 997</div><div class="plan-note">pagamento único · frete incluso</div>
+        <div class="plan-cb"><div class="plan-cb-lbl">Cashback por compra</div><div class="plan-cb-val">6%</div></div>
+        <div class="plan-div"></div>
+        <ul class="plan-feats">
+          <li><div class="pck">✓</div>Tudo do CARBON</li>
+          <li><div class="pck">✓</div>Cartão gravado com seu nome</li>
+          <li><div class="pck">✓</div>6% cashback máximo</li>
+          <li><div class="pck">✓</div>Seguro do cartão incluso</li>
+          <li><div class="pck">✓</div>Gerente pessoal dedicado</li>
+          <li><div class="pck">✓</div>Acesso antecipado a recursos</li>
+        </ul>
+        <button class="plan-btn plan-btn-out" onclick="alert('Em breve!')">Quero o OBSIDIAN</button>
+      </div>
+    </div>
+  </div>
+  <div class="guarantee reveal">
+    <div class="g-item"><svg class="icon icon-md"><use href="#ico-lock"/></svg>Pagamento 100% seguro</div>
+    <div class="g-item"><svg class="icon icon-md"><use href="#ico-package"/></svg>Frete grátis para todo o Brasil</div>
+    <div class="g-item"><svg class="icon icon-md"><use href="#ico-refresh"/></svg>Garantia de 30 dias</div>
+    <div class="g-item"><svg class="icon icon-md"><use href="#ico-shield"/></svg>Certificação PCI-DSS</div>
+  </div>
+</section>
+
+<!-- CASHBACK -->
+<section class="sec cb-sec" id="cashback">
+  <div class="cb-inner">
+    <div class="reveal">
+      <span class="sec-tag">Cashback</span>
+      <h2 class="sec-title">Cada compra devolve<br>dinheiro real.</h2>
+      <p class="sec-sub">Sem pontos, sem conversão, sem prazo de expiração. O percentual do seu plano é creditado automaticamente a cada transação.</p>
+      <div class="cb-bars">
+        <div class="cb-row"><div class="cb-name" style="color:var(--steel)">STEEL</div><div class="cb-track"><div class="cb-fill" style="width:0%;background:var(--steel)" data-w="16.6"></div></div><div class="cb-pct" style="color:var(--steel)">1%</div></div>
+        <div class="cb-row"><div class="cb-name" style="color:var(--titan)">TITAN</div><div class="cb-track"><div class="cb-fill" style="width:0%;background:var(--titan)" data-w="41.6"></div></div><div class="cb-pct" style="color:var(--titan)">2,5%</div></div>
+        <div class="cb-row"><div class="cb-name" style="color:var(--carbon)">CARBON</div><div class="cb-track"><div class="cb-fill" style="width:0%;background:var(--carbon)" data-w="66.6"></div></div><div class="cb-pct" style="color:var(--carbon)">4%</div></div>
+        <div class="cb-row"><div class="cb-name" style="color:var(--obs)">OBSIDIAN</div><div class="cb-track"><div class="cb-fill" style="width:0%;background:var(--obs)" data-w="100"></div></div><div class="cb-pct" style="color:var(--obs)">6%</div></div>
+      </div>
+      <p style="margin-top:20px;font-size:12px;color:var(--gray);font-style:italic;">Exemplo: com OBSIDIAN, a cada R$1.000 você recebe R$60 de volta. Sem nenhuma ação necessária.</p>
+    </div>
+    <div class="reveal cb-visual">
+      <div class="cb-ring"></div><div class="cb-ring"></div><div class="cb-ring"></div>
+      <div class="cb-center"><div class="cb-big">6%</div><div class="cb-small">de volta</div></div>
+      <div class="cb-tags l">
+        <div class="cb-tag"><div class="cb-dot" style="background:var(--green)"></div>Dinheiro real na conta</div>
+        <div class="cb-tag"><div class="cb-dot" style="background:var(--cyan)"></div>Sem prazo de expiração</div>
+        <div class="cb-tag"><div class="cb-dot" style="background:var(--titan)"></div>Sem conversão de pontos</div>
+      </div>
+      <div class="cb-tags r">
+        <div class="cb-tag"><div class="cb-dot" style="background:var(--obs)"></div>Automático em toda compra</div>
+        <div class="cb-tag"><div class="cb-dot" style="background:var(--steel)"></div>Transferível ou utilizável</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SEGURANÇA -->
+<section class="sec" id="security">
+  <div class="seg-inner">
+    <div class="reveal">
+      <span class="sec-tag">Segurança</span>
+      <h2 class="sec-title">Construído para<br>não ceder.</h2>
+      <p class="sec-sub">Cada decisão de design foi tomada com o cenário de perda ou roubo em mente, porque esse momento sempre chega.</p>
+      <ul class="seg-list">
+        <li class="seg-item"><div class="seg-ico"><svg class="icon icon-lg"><use href="#ico-fingerprint"/></svg></div><div><div class="seg-t">Biometria obrigatória</div><p class="seg-d">Sem sua impressão digital, o cartão não realiza nenhuma transação. Em lugar nenhum, por ninguém.</p></div></li>
+        <li class="seg-item"><div class="seg-ico"><svg class="icon icon-lg"><use href="#ico-lock"/></svg></div><div><div class="seg-t">Dados ocultos por padrão</div><p class="seg-d">Números dos cartões só aparecem no display após autenticação biométrica. Inútil para quem encontrar.</p></div></li>
+        <li class="seg-item"><div class="seg-ico"><svg class="icon icon-lg"><use href="#ico-phone"/></svg></div><div><div class="seg-t">Alterações só via celular mestre</div><p class="seg-d">Trocar cartão, alterar configurações ou resetar tudo exige autenticação no dispositivo cadastrado.</p></div></li>
+        <li class="seg-item"><div class="seg-ico"><svg class="icon icon-lg"><use href="#ico-zap"/></svg></div><div><div class="seg-t">Desativação em 3 segundos</div><p class="seg-d">Um toque no app e o cartão é bloqueado globalmente, imediatamente, em qualquer lugar do mundo.</p></div></li>
+      </ul>
+    </div>
+    <div class="seg-stats reveal">
+      <div class="seg-stat"><div class="seg-n">256</div><div class="seg-l">bits AES: criptografia de nível governamental em todos os dados armazenados no chip</div></div>
+      <div class="seg-stat"><div class="seg-n">5x</div><div class="seg-l">mais seguro que carteira convencional. Impossível usar sem autenticação biométrica</div></div>
+      <div class="seg-stat"><div class="seg-n">0s</div><div class="seg-l">de exposição de dados sem autenticação. Tudo oculto por padrão, sempre, em qualquer estado</div></div>
+      <div class="seg-stat" style="border-color:rgba(0,212,240,.16)">
+        <div style="color:var(--cyan)"><svg class="icon" style="width:28px;height:28px"><use href="#ico-shield"/></svg></div>
+        <div class="seg-l"><strong style="color:var(--white)">Autobloqueio por chip</strong>: após tentativas suspeitas repetidas, o chip bloqueia permanentemente sem possibilidade de reset externo</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARATIVO -->
+<section class="sec comp-sec">
+  <div class="reveal" style="text-align:center">
+    <span class="sec-tag">Comparativo</span>
+    <h2 class="sec-title">VAULTA vs. o mercado atual.</h2>
+    <p class="sec-sub" style="margin:0 auto">O que nenhum banco ou fintech entrega hoje em um único produto.</p>
+  </div>
+  <div class="comp-wrap reveal">
+    <table class="comp-table">
+      <thead>
+        <tr><th>Funcionalidade</th><th class="hi">VAULTA</th><th>Banco Digital</th><th>Carteira Física</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="feat">Biometria no cartão físico</td><td class="vaulta">Incluso</td><td class="no">Não existe</td><td class="no">Não existe</td></tr>
+        <tr><td class="feat">Múltiplos cartões em um</td><td class="vaulta">Ilimitado</td><td class="no">1 por app</td><td class="no">Só físico</td></tr>
+        <tr><td class="feat">Cripto no varejo físico</td><td class="vaulta">BTC, ETH, SOL e mais</td><td class="no">Separado</td><td class="no">Impossível</td></tr>
+        <tr><td class="feat">Modo Gift Card com limite físico</td><td class="vaulta">Ilimitado</td><td class="no">Não existe</td><td class="no">Não existe</td></tr>
+        <tr><td class="feat">Bloqueio remoto instantâneo</td><td class="vaulta">Menos de 3 segundos</td><td class="yes">Disponível</td><td class="no">Impossível</td></tr>
+        <tr><td class="feat">Cashback automático real</td><td class="vaulta">Até 6%</td><td class="yes">Até 2%</td><td class="no">Nenhum</td></tr>
+        <tr><td class="feat">Pagamento único sem anuidade</td><td class="vaulta">Uma vez só</td><td class="no">Mensalidade</td><td class="no">Troca</td></tr>
+        <tr><td class="feat">Controle de gastos físico</td><td class="vaulta">Gift Card Mode</td><td class="no">Só digital</td><td class="no">Impossível</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- DEPOIMENTOS -->
+<section class="sec" style="background:var(--surf);border-top:1px solid var(--border)">
+  <div class="reveal" style="text-align:center">
+    <span class="sec-tag">Depoimentos</span>
+    <h2 class="sec-title">Quem testou não<br>volta à carteira comum.</h2>
+  </div>
+  <div class="dep-grid reveal">
+    <div class="dep-card">
+      <div class="dep-quote">"</div>
+      <div class="dep-stars">
+        <svg class="icon" style="width:14px;height:14px"><use href="#ico-star"/></svg>
+        <svg class="icon" style="width:14px;height:14px"><use href="#ico-star"/></svg>
+        <svg class="icon" style="width:14px;height:14px"><use href="#ico-star"/></svg>
+        <svg class="icon" style="width:14px;height:14px"><use href="#ico-star"/></svg>
+        <svg class="icon" style="width:14px;height:14px"><use href="#ico-star"/></svg>
+      </div>
+      <p class="dep-text">Finalmente não carrego 4 cartões na mochila. O Gift Card Mode é perfeito: defino o quanto posso gastar antes de sair e pronto. Zero desperdício.</p>
+      <div class="dep-author">
+        <div class="dep-av" style="background:rgba(0,212,240,.1);color:var(--cyan)">R</div>
+        <div><div class="dep-name">Rafael M.</div><div class="dep-role">Designer · Plano CARBON</div></div>
+      </div>
+    </div>
+    <div class="dep-card">
+      <div class="dep-quote">"</div>
+      <div class="dep-stars">
+        <svg class="icon" style="width:14px;height:14px"><use href="#ico-star"/></svg>
+        <svg class="icon" style="width:14px;height:14px"><use href="#ico-star"/></svg>
+        <svg class="icon" style="width:14px;height:14px"><use href="#ico-star"/></svg>
+        <svg class="icon" style="width:14px;height:14px"><use href="#ico-star"/></svg>
+        <svg class="icon" style="width:14px;height:14px"><use href="#ico-star"/></svg>
+      </div>
+      <p class="dep-text">Perdi a carteira na rua e desativei em menos de 5 segundos pelo app. Ninguém gastou nada. Isso sozinho já valeu cada centavo do cartão.</p>
+      <div class="dep-author">
+        <div class="dep-av" style="background:rgba(144,80,216,.1);color:var(--obs)">C</div>
+        <div><div class="dep-name">Camila S.</div><div class="dep-role">Advogada · Plano OBSIDIAN</div></div>
+      </div>
+    </div>
+    <div class="dep-card">
+      <div class="dep-quote">"</div>
+      <div class="dep-stars">
+        <svg class="icon" style="width:14px;height:14px"><use href="#ico-star"/></svg>
+        <svg class="icon" style="width:14px;height:14px"><use href="#ico-star"/></svg>
+        <svg class="icon" style="width:14px;height:14px"><use href="#ico-star"/></svg>
+        <svg class="icon" style="width:14px;height:14px"><use href="#ico-star"/></svg>
+        <svg class="icon" style="width:14px;height:14px"><use href="#ico-star"/></svg>
+      </div>
+      <p class="dep-text">Uso Ethereum no restaurante todo dia. Chego, coloco a digital, aproximo. O estabelecimento recebe em reais, eu pago em cripto. É o futuro.</p>
+      <div class="dep-author">
+        <div class="dep-av" style="background:rgba(192,160,48,.1);color:var(--titan)">L</div>
+        <div><div class="dep-name">Lucas B.</div><div class="dep-role">Desenvolvedor · Plano TITAN</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="sec" id="faq">
+  <div class="reveal" style="text-align:center">
+    <span class="sec-tag">Perguntas Frequentes</span>
+    <h2 class="sec-title">Dúvidas comuns,<br>respostas diretas.</h2>
+  </div>
+  <div class="faq-list reveal">
+    <div class="faq-item">
+      <div class="faq-q"><span class="faq-qt">O VAULTA funciona em qualquer maquininha?</span><div class="faq-ic">+</div></div>
+      <div class="faq-a"><p>Sim. O VAULTA utiliza NFC padrão internacional, compatível com qualquer maquininha moderna que aceite pagamento por aproximação: Cielo, Stone, PagSeguro, Rede, Getnet e todas as demais.</p></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q"><span class="faq-qt">E se eu perder o celular junto com o cartão?</span><div class="faq-ic">+</div></div>
+      <div class="faq-a"><p>Você acessa sua conta VAULTA por qualquer navegador e desativa o cartão remotamente. A reativação exige verificação em dois fatores. Você mantém controle total mesmo sem o celular original.</p></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q"><span class="faq-qt">O pagamento único inclui atualizações do app?</span><div class="faq-ic">+</div></div>
+      <div class="faq-a"><p>Sim. O app é gratuito e todas as atualizações de software são permanentemente incluídas. O único custo opcional é um plano anual de manutenção para reposição física do cartão.</p></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q"><span class="faq-qt">Como funciona o cashback exatamente?</span><div class="faq-ic">+</div></div>
+      <div class="faq-a"><p>A cada transação, o percentual do seu plano é creditado automaticamente na sua conta VAULTA. Sem pontos, sem conversão, sem prazo de expiração. Dinheiro real disponível para uso imediato.</p></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q"><span class="faq-qt">Posso usar cripto em qualquer estabelecimento?</span><div class="faq-ic">+</div></div>
+      <div class="faq-a"><p>Sim. A conversão para BRL acontece automaticamente no momento da transação, de forma transparente para o estabelecimento. Eles recebem em reais normalmente e você paga em cripto.</p></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q"><span class="faq-qt">Quando o VAULTA é entregue?</span><div class="faq-ic">+</div></div>
+      <div class="faq-a"><p>Estamos em fase de pré-lançamento. Quem garante a vaga agora entra na lista prioritária, recebe o cartão antes do público geral e trava o preço atual, que será reajustado no lançamento oficial.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-sec">
+  <div class="cta-glow"></div>
+  <h2 class="reveal">Carregar menos.<br><span style="color:var(--cyan)">Ter muito mais.</span></h2>
+  <p class="reveal">Entre na lista de espera. Preço de pré-lançamento por tempo limitado.</p>
+  <div class="cta-form reveal">
+    <input type="email" class="cta-input" placeholder="seu@email.com">
+    <button class="btn-primary" onclick="alert('Obrigado! Você está na lista.')">Garantir minha vaga</button>
+  </div>
+  <p class="cta-note reveal">
+    <svg class="icon icon-sm" style="color:var(--cyan)"><use href="#ico-lock"/></svg>
+    Sem spam. <span>Seus dados estão seguros.</span> Cancelamento a qualquer momento.
+  </p>
+  <div class="tier-pills reveal">
+    <div class="tier-pill" style="border:1px solid rgba(122,154,176,.2)"><div class="tier-pill-name" style="color:var(--steel)">STEEL</div><div class="tier-pill-price">R$149</div></div>
+    <div class="tier-pill" style="border:1px solid rgba(192,160,48,.2)"><div class="tier-pill-name" style="color:var(--titan)">TITAN</div><div class="tier-pill-price">R$299</div></div>
+    <div class="tier-pill" style="border:1px solid rgba(168,176,192,.25)"><div class="tier-pill-name" style="color:var(--carbon)">CARBON</div><div class="tier-pill-price">R$499</div></div>
+    <div class="tier-pill" style="border:1px solid rgba(144,80,216,.25)"><div class="tier-pill-name" style="color:var(--obs)">OBSIDIAN</div><div class="tier-pill-price">R$997</div></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="f-logo">VAULT<span>A</span></div>
+  <ul class="f-links">
+    <li><a href="#">Privacidade</a></li>
+    <li><a href="#">Termos de Uso</a></li>
+    <li><a href="#">Contato</a></li>
+    <li><a href="#">contato@vaulta.com</a></li>
+  </ul>
+  <div class="f-copy">© 2026 VAULTA. Todos os direitos reservados.</div>
+</footer>
+
+<!-- URGENCY BAR -->
+<div class="urgency">
+  <div class="u-left">
+    <div class="u-dot"></div>
+    <div class="u-text"><strong>347 pessoas</strong> visualizando agora · Vagas limitadas no pré-lançamento</div>
+  </div>
+  <div class="u-timer" id="timer">23:47:12</div>
+  <button class="u-btn" onclick="document.getElementById('planos').scrollIntoView({behavior:'smooth'})">Garantir agora</button>
+</div>
+
+<script>
+const vcard=document.getElementById('vcard');
+const wrap=document.getElementById('cardWrap');
+wrap.addEventListener('mousemove',e=>{
+  const r=wrap.getBoundingClientRect();
+  const dx=(e.clientX-r.left-r.width/2)/r.width;
+  const dy=(e.clientY-r.top-r.height/2)/r.height;
+  vcard.style.animation='none';
+  vcard.style.transform=`rotateX(${-dy*20+8}deg) rotateY(${dx*20-10}deg)`;
+});
+wrap.addEventListener('mouseleave',()=>{vcard.style.animation='floatCard 7s ease-in-out infinite';});
+
+const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('visible');});},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(r=>obs.observe(r));
+
+const bObs=new IntersectionObserver(e=>{
+  e.forEach(x=>{
+    if(x.isIntersecting){
+      x.target.querySelectorAll('.cb-fill').forEach(b=>{setTimeout(()=>{b.style.width=b.dataset.w+'%';},200);});
+      bObs.unobserve(x.target);
+    }
+  });
+},{threshold:.3});
+document.querySelectorAll('.cb-bars').forEach(el=>bObs.observe(el));
+
+document.querySelectorAll('.faq-q').forEach(q=>{
+  q.addEventListener('click',()=>{
+    const item=q.parentElement;
+    const was=item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+    if(!was)item.classList.add('open');
+  });
+});
+
+let h=23,m=47,s=12;
+const timer=document.getElementById('timer');
+setInterval(()=>{
+  s--;if(s<0){s=59;m--;if(m<0){m=59;h--;if(h<0)h=23;}}
+  timer.textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+},1000);
+
+document.body.style.paddingBottom='56px';
+</script>
+</body>
+</html>
